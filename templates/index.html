@@ -11,14 +11,13 @@
               </div>
               <input type="text" class="form-control" name="title" placeholder="Enter Todo...">
             </div>
-            <div class="col-sm-4 btn btn-dark dropdown-toggle" type="button" name="category" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Category
-            </div>
-              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item" href="#">Programming</a>
-                <a class="dropdown-item" href="#">Art</a>
-                <a class="dropdown-item" href="#">Sport</a>
-              </div>
+
+            <select name="category" class="col-sm-4 input-group mb form-control" type="text">
+              {% for o in category %}
+              <option value="{{ o.category }}">{{ o.category }}</option>
+              {% endfor %}
+            </select>
+
             <div class="col-sm-4">  
               <button class="btn btn-dark" type="submit">Add</button>
             </div>

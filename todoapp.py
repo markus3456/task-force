@@ -15,7 +15,8 @@ class Todo(db.Model):
 @app.route('/')
 def index():
     todo_list = Todo.query.all()
-    return render_template('index.html', todo_list=todo_list)
+    category=[{'category': 'Select Category'},{'category': 'programming'},{'category': 'art'},{'category':'sport'}]
+    return render_template('index.html', category=category, todo_list=todo_list)
     print(todo_list)
 
 @app.route("/add", methods=["POST"])
