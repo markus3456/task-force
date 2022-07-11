@@ -6,4 +6,63 @@
             competed tasks, activity, time of completition
             {% endblock %}
         </p>
+
+        <!-- <form action="/statistics" method="post">
+            <div class="row">
+            
+                <div class="col-sm-4 input-group mb">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">todo title</span>
+                  </div>
+                  <input type="text" class="form-control" name="title" placeholder="Enter Todo...">
+                </div>
+    
+                <select name="category" class="col-sm-4 input-group mb form-control" type="text">
+                  {% for o in category %}
+                  <option value="{{ o.category }}">{{ o.category }}</option>
+                  {% endfor %}
+                </select>
+    
+                <div class="col-sm-4">  
+                  <button class="btn btn-dark" type="submit">Add</button>
+                </div>
+            </div>
+        </form> -->
+    
+        
+    
+        <br>
+        <table class="table table-striped">
+          <thead class="thead-dark">
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Create Time</th>
+              <th>Complete Time</th>
+              <th>Status</th>
+              
+            </tr>
+          </thead>
+          
+          {% for todo in todo_list %}
+          <tr>
+            <td>{{ todo.id }}</td>
+            <td>{{ todo.title }}</td>
+            <td>{{ todo.category }}</td>
+            <td>{{ todo.createtime }}</td>
+            <td>{{ todo.completetime }}</td>
+            <td>
+              {% if todo.complete == False %}
+                <span>| Not Completed</span>
+              {% else %}
+                <span>| Completed</span>
+              {% endif %}
+            </td>
+            
+          </tr>
+                
+    
+        {% endfor %}    
+    
 {% endblock %}
