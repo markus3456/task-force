@@ -83,9 +83,32 @@ def statistics():
     q3 = db.session.query(Todo).all()
     print(q3)
     df = pd.read_sql('SELECT * FROM tasks',  db.session.bind)
+    query = ' category FROM tasks WHERE complete = true'
+    
+    query4 = '''
+    SELECT DATE(completetime) AS date, category, count(category) AS count 
+    FROM tasks
+    GROUP BY date, category
+
+    '''
+
+    query2 = '''
+    WITH cat AS(
+            SELECT DATE(completetime) AS date, category, count(category) AS count 
+    FROM tasks
+    GROUP BY date, category )
+    SELECT * , sum(count) OVER (PARTITION BY category ORDER BY count) AS count_all
+    FROM cat
+    GROUP BY date ,category, count
+    
+    '''
+   
+
+    df2 = pd.read_sql(query2,  db.session.bind)
     print(df.info())
+    print(df2)
     b = df.completetime - df.createtime
-    b = b.astype('timedelta64[m]')
+    b = b.astype('timedelta64[h]')
     print(b)
 
     return render_template('statistics.html', todo_list=todo_list)
