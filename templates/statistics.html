@@ -4,6 +4,33 @@
     <h1>{% block title %} Statistics {% endblock %}</h1>
         <p>{% block body %} 
             competed tasks, activity, time of completition
+
+            <!-- <canvas id="lineChart" width="900" height="400"></canvas>
+            <script>
+              var ctx = document.getElementById("lineChart").getContext("2d");
+              var lineChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                  label: {{ labels | safe }},
+                  datasets: [
+                    {
+                      label: "count",
+                      data: {{values | safe}},
+                      fill: false,
+                      lineTension: 0.1,
+                    }
+    
+                  ]
+                },
+                options: {
+                  responsive: false
+                }
+              });
+            </script> -->
+
+
+
+
             {% endblock %}
         </p>
 
@@ -29,11 +56,10 @@
             </div>
         </form> -->
     
-        
-    
         <br>
         <table class="table table-striped">
           <thead class="thead-dark">
+            
             <tr>
               <th>ID</th>
               <th>Title</th>
@@ -63,7 +89,16 @@
           </tr>
                 
     
-        {% endfor %}    
+        {% endfor %}
+        <h3>Completed Tasks over time</h3>    
+        <div id='chart' class='chart'”></div>
 
+        <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+        <script type='text/javascript'>
+          var graphs = {{graphJSON | safe}};
+          Plotly.plot('chart',graphs,{});
+        </script>
+        
+        <h3>Table of Tasks</h3>
     
 {% endblock %}
