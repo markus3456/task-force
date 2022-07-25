@@ -43,7 +43,7 @@ class Todo(db.Model):
 @app.route('/')                         #define the Address. / means homepage
 def index():
     #create lists of data which is needed in this page for the website
-    todo_list = Todo.query.all()        #query the db using our defined class we defined before named Todo, List will be used to display all tasks in db
+    todo_list = db.session.query(Todo).filter_by(complete=False)      #query the db using our defined class we defined before named Todo, List will be used to display all tasks in db
     category=[{'category': 'Select Category'},{'category': 'programming'},{'category': 'art'},{'category':'sport'}]     #define list of categories for dropdown menu
     return render_template('index.html', category=category, todo_list=todo_list) #need to render our html template and send our created lists
     print(todo_list)
@@ -114,13 +114,25 @@ def statistics():
    
     df2 = pd.read_sql(query2,  db.session.bind) #query our db with pre-defined query to get cumulative number of tasks
     
+    query3 = '''
+    WITH cat AS(
+        SELECT category, count(category) AS count  
+        FROM fake_tasks
+        GROUP BY category)
+    SELECT *, round(100 * count / (sum(count) OVER())::numeric,2) AS percent
+    FROM cat
+    GROUP BY category ,count
+    
+    '''
+    df3 = pd.read_sql(query3, db.session.bind)
+    #print(df3)
 
     tc = df.completetime - df.createtime #calculate time to complete for each task using time difference
     tc = tc.astype('timedelta64[h]')  #transform format to display hours
     tc = round(tc.mean(),2)
     print(df.info())
     df2 = df2.sort_values(by="date")
-    print(df2)
+    print(df3)
     print(tc)
     print(count)
 
