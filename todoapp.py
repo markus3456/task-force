@@ -125,8 +125,7 @@ def statistics():
     
     '''
     df3 = pd.read_sql(query3, db.session.bind)
-    #print(df3)
-
+   
     tc = df.completetime - df.createtime #calculate time to complete for each task using time difference
     tc = tc.astype('timedelta64[h]')  #transform format to display hours
     tc = round(tc.mean(),2)
@@ -161,7 +160,18 @@ def statistics():
     ))
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     
-    return render_template('statistics.html', todo_list=todo_list,  graphJSON=graphJSON)
+    labels = df3['category'].tolist()
+    values = df3['percent'].tolist()
+    print(labels)
+    fig2 = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.4)])
+
+    graphJSON_2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
+
+
+    count = str(count)
+    tc = str(tc)
+
+    return render_template('statistics.html', todo_list=todo_list,  graphJSON=graphJSON, graphJSON_2=graphJSON_2, count=count, tc=tc )
 
 if __name__ =="__main__":
     #db.create_all()
