@@ -86,18 +86,10 @@ def about():
 def statistics():
     todo_list = Todo.query.all()
     count = db.session.query(Todo).filter_by().count()
-    q3 = db.session.query(Todo).all()
-    print(q3)
+    
     #import data from sql db to pandas dataframe to simplify data manipulation
     df = pd.read_sql('SELECT * FROM fake_tasks',  db.session.bind)   #create dataframe by querying sql db and establishing session.
     
-    # query = ' category FROM tasks WHERE complete = true'
-    # query4 = '''
-    # SELECT DATE(completetime) AS date, category, count(category) AS count 
-    # FROM tasks
-    # GROUP BY date, category
-
-    #'''
     #create cumulative count over time grouped by categories.
     #this enables visualizing the progress of competed task over a certain time
     query2 = '''
@@ -114,6 +106,7 @@ def statistics():
    
     df2 = pd.read_sql(query2,  db.session.bind) #query our db with pre-defined query to get cumulative number of tasks
     
+    #querying tasks of all categories as percentage to visualize it in pie chart later
     query3 = '''
     WITH cat AS(
         SELECT category, count(category) AS count  
@@ -124,9 +117,9 @@ def statistics():
     GROUP BY category ,count
     
     '''
-    df3 = pd.read_sql(query3, db.session.bind)
+    df3 = pd.read_sql(query3, db.session.bind)  #create dataframe with amount of tasks for each category unsing sql query3
    
-    tc = df.completetime - df.createtime #calculate time to complete for each task using time difference
+    tc = df.completetime - df.createtime #calculate time to complete for each task using time difference, tc = time to complete
     tc = tc.astype('timedelta64[h]')  #transform format to display hours
     tc = round(tc.mean(),2)
     print(df.info())
@@ -135,39 +128,38 @@ def statistics():
     print(tc)
     print(count)
 
-    dfp = df2.loc[df2['category'] == 'programming']
-    dfa = df2.loc[df2['category'] == 'art']
-    dfs = df2.loc[df2['category'] == 'sport']
-    print(dfp)
+    #Graphs
+    #fig is a line chart to vizualize the cumulative amount of tasks over time of each category
+    category_list = ['programming','art','sport']
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x = dfp['date'],
-        y = dfp['count_all'],
-        name = 'Programming',
-    ))
-
-    fig.add_trace(go.Scatter(
-        x = dfs['date'],
-        y = dfp['count_all'],
-        name = 'Sport',
-    ))
-
-    fig.add_trace(go.Scatter(
-        x = dfa['date'],
-        y = dfp['count_all'],
-        name = 'Art',
-    ))
+    for k in category_list:
+        dfc = df2.loc[df2['category'] == k]
+        fig.add_trace(go.Scatter(
+            x = dfc['date'],
+            y= dfc['count_all'],
+            name = k
+        ))
+    #difine layout, distance is 5 each to the border 
+    fig.update_layout(    
+        margin=dict(l=5, r=5, t=5, b=5),
+    )
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     
+    #fig2 pie-chart to vizualize allocation of tasks of each category
     labels = df3['category'].tolist()
     values = df3['percent'].tolist()
     print(labels)
     fig2 = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.4)])
-
+    fig2.update_layout(
+        autosize=False,
+        width=300,
+        height=150,
+        margin=dict(l=5, r=5, t=1, b=1),
+    )
     graphJSON_2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
 
-
+    #in order to send numbers to our statistics.html, we need strings. Int, float,... wont work
     count = str(count)
     tc = str(tc)
 
