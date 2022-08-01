@@ -1,3 +1,22 @@
+from flask import (
+    Flask,
+    render_template,
+    redirect,
+    flash,
+    url_for,
+    session
+)
+
+from datetime import timedelta
+from sqlalchemy.exc import (
+    IntegrityError,
+    DataError,
+    DatabaseError,
+    InterfaceError,
+    InvalidRequestError,
+)
+from werkzeug.routing import BuildError
+
 from turtle import title
 import pandas as pd
 import numpy as np
@@ -12,41 +31,123 @@ import plotly
 import plotly.express as px
 import plotly.graph_objects as go
 
+from flask_bcrypt import Bcrypt,generate_password_hash, check_password_hash
+
+from flask_login import (
+    UserMixin,
+    login_user,
+    LoginManager,
+    current_user,
+    logout_user,
+    login_required,
+)
+
+from app import create_app,db,login_manager,bcrypt
+from models import User
+from forms import login_form,register_form
+from models import Todo
 
 
-#create app
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:admin@localhost:5432/taskforce'  #connect to database on localhost
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)            #define variable to use modules of SQLAlchemy in this app
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
-#in order to create the table named "tasks" in the database "taskforce", we need to create a model
-class Todo(db.Model):               
+app = create_app()
 
-    __tablename__ = 'fake_tasks'
-    #define columns of db
-    id = db.Column(db.Integer, primary_key=True)    
-    title = db.Column(db.String(100))
-    category = db.Column(db.String(50))
-    createtime = db.Column(db.DateTime())
-    completetime = db.Column(db.DateTime())
-    complete = db.Column(db.Boolean)
 
-    def __init__(self, title, category, createtime, completetime, complete):            #constructor
-            self.title = title;
-            self.category = category;
-            self.createtime = createtime;
-            self.completetime = completetime;
-            self.complete = complete;
+@app.before_request
+def session_handler():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=30)
 
-#Main Page
-@app.route('/')                         #define the Address. / means homepage
+@app.route("/", methods=("GET", "POST"), strict_slashes=False)
 def index():
-    #create lists of data which is needed in this page for the website
     todo_list = db.session.query(Todo).filter_by(complete=False)      #query the db using our defined class we defined before named Todo, List will be used to display all tasks in db
     category=[{'category': 'Select Category'},{'category': 'programming'},{'category': 'art'},{'category':'sport'}]     #define list of categories for dropdown menu
     return render_template('index.html', category=category, todo_list=todo_list) #need to render our html template and send our created lists
-    print(todo_list)
+    #print(todo_list)
+    #return render_template("index.html",title="Home")
+
+
+@app.route("/login/", methods=("GET", "POST"), strict_slashes=False)
+def login():
+    form = login_form()
+
+    if form.validate_on_submit():
+        try:
+            user = User.query.filter_by(email=form.email.data).first()
+            if check_password_hash(user.pwd, form.pwd.data):
+                login_user(user)
+                return redirect(url_for('index'))
+            else:
+                flash("Invalid Username or password!", "danger")
+        except Exception as e:
+            flash(e, "danger")
+
+    return render_template("auth.html",
+        form=form,
+        text="Login",
+        title="Login",
+        btn_action="Login"
+        )
+
+
+
+# Register route
+@app.route("/register/", methods=("GET", "POST"), strict_slashes=False)
+def register():
+    form = register_form()
+    if form.validate_on_submit():
+        try:
+            email = form.email.data
+            pwd = form.pwd.data
+            username = form.username.data
+            
+            newuser = User(
+                username=username,
+                email=email,
+                pwd=bcrypt.generate_password_hash(pwd).decode('utf-8'),
+            )
+    
+            db.session.add(newuser)
+            db.session.commit()
+            flash(f"Account Succesfully created", "success")
+            return redirect(url_for("login"))
+
+        except InvalidRequestError:
+            db.session.rollback()
+            flash(f"Something went wrong!", "danger")
+        except IntegrityError:
+            db.session.rollback()
+            flash(f"User already exists!.", "warning")
+        except DataError:
+            db.session.rollback()
+            flash(f"Invalid Entry", "warning")
+        except InterfaceError:
+            db.session.rollback()
+            flash(f"Error connecting to the database", "danger")
+        except DatabaseError:
+            db.session.rollback()
+            flash(f"Error connecting to the database", "danger")
+        except BuildError:
+            db.session.rollback()
+            flash(f"An error occured !", "danger")
+    return render_template("auth.html",
+        form=form,
+        text="Create account",
+        title="Register",
+        btn_action="Register account"
+        )
+
+
+#Main Page
+# @app.route('/')                         #define the Address. / means homepage
+# def index():
+#     #create lists of data which is needed in this page for the website
+#     todo_list = db.session.query(Todo).filter_by(complete=False)      #query the db using our defined class we defined before named Todo, List will be used to display all tasks in db
+#     category=[{'category': 'Select Category'},{'category': 'programming'},{'category': 'art'},{'category':'sport'}]     #define list of categories for dropdown menu
+#     return render_template('index.html', category=category, todo_list=todo_list) #need to render our html template and send our created lists
+#     print(todo_list)
 
 #define function to add tasks
 @app.route("/add", methods=["POST"]) #define address, method = POST is used to send data to a server to create/update a resource.
@@ -165,7 +266,14 @@ def statistics():
 
     return render_template('statistics.html', todo_list=todo_list,  graphJSON=graphJSON, graphJSON_2=graphJSON_2, count=count, tc=tc )
 
-if __name__ =="__main__":
-    #db.create_all()
 
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+ 
+if __name__ == "__main__":
     app.run(debug=True)

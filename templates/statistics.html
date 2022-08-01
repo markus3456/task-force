@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="container py-4 text-left">
+
+
+  {% if current_user.is_authenticated %}
     <h1>{% block title %} Statistics {% endblock %}</h1>
         <p>{% block body %} 
             competed tasks, activity, time of completition
@@ -101,6 +105,10 @@
         </div>
 
         
+  {% else %}
+
+        <a href="{{url_for('login')}}">Sign in/Sign Up</a>
         
-    
+   {% endif %}     
+</div>   
 {% endblock %}

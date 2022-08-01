@@ -1,6 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="container py-4 text-center">
+
+
+  {% if current_user.is_authenticated %}
+
+  <h1>Welcome {{ current_user.username }}</h1>
+  <a href="{{url_for('logout')}}">Logout</a>
+
+
     <h1>{% block title %} Welcome to To-Do-App {% endblock %}</h1>
     <form action="/add" method="post">
         <div class="row">
@@ -61,6 +70,13 @@
             
 
     {% endfor %}
+
+    {% else %}
+
+    <a href="{{url_for('login')}}">Sign in/Sign Up</a>
+    
+    {% endif %}
+</div>
 
 
 {% endblock %}
