@@ -1,3 +1,4 @@
+from sqlalchemy import ForeignKey
 from app import db
 from flask_login import UserMixin
 import psycopg2
@@ -24,10 +25,13 @@ class Todo(db.Model):
     createtime = db.Column(db.DateTime())
     completetime = db.Column(db.DateTime())
     complete = db.Column(db.Boolean)
+    user_id = db.Column(db.Integer, db.ForeignKey('user2.id'))
+    request = db.relationship("User", backref=db.backref("user2", uselist=False))
 
-    def __init__(self, title, category, createtime, completetime, complete):            #constructor
+    def __init__(self, title, category, createtime, completetime, complete, user_id):            #constructor
             self.title = title;
             self.category = category;
             self.createtime = createtime;
             self.completetime = completetime;
             self.complete = complete;
+            self.user_id = user_id;

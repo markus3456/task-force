@@ -60,13 +60,7 @@ def session_handler():
     session.permanent = True
     app.permanent_session_lifetime = timedelta(minutes=30)
 
-@app.route("/", methods=("GET", "POST"), strict_slashes=False)
-def index():
-    todo_list = db.session.query(Todo).filter_by(complete=False)      #query the db using our defined class we defined before named Todo, List will be used to display all tasks in db
-    category=[{'category': 'Select Category'},{'category': 'programming'},{'category': 'art'},{'category':'sport'}]     #define list of categories for dropdown menu
-    return render_template('index.html', category=category, todo_list=todo_list) #need to render our html template and send our created lists
-    #print(todo_list)
-    #return render_template("index.html",title="Home")
+
 
 
 @app.route("/login/", methods=("GET", "POST"), strict_slashes=False)
@@ -90,7 +84,6 @@ def login():
         title="Login",
         btn_action="Login"
         )
-
 
 
 # Register route
@@ -139,6 +132,16 @@ def register():
         btn_action="Register account"
         )
 
+@app.route("/", methods=("GET", "POST"), strict_slashes=False)
+def index():
+    curr_user = current_user.id
+    print(curr_user)
+    todo_list = db.session.query(Todo).filter_by(complete=False, user_id=curr_user)      #query the db using our defined class we defined before named Todo, List will be used to display all tasks in db
+    category=[{'category': 'Select Category'},{'category': 'programming'},{'category': 'art'},{'category':'sport'}]     #define list of categories for dropdown menu
+    return render_template('index.html', category=category, todo_list=todo_list) #need to render our html template and send our created lists
+    #print(todo_list)
+    #return render_template("index.html",title="Home")
+
 
 #Main Page
 # @app.route('/')                         #define the Address. / means homepage
@@ -153,11 +156,12 @@ def register():
 @app.route("/add", methods=["POST"]) #define address, method = POST is used to send data to a server to create/update a resource.
 def add():
     # add new item
+    curr_user = current_user.id
     title = request.form.get("title")       #at our page we have to enter a title. ".get" takes the string from the input 
     category = request.form.get("category")     #same priciple. get pre-defined string from dropdown menu
     ts = datetime.now()                         #now we create a timestamp of current time to define createtime
     ts = ts.replace(second=0, microsecond=0)    #remove seconds and microseconds
-    new_todo = Todo(title=title, category=category, createtime=ts, completetime=None, complete=False)   #create a new entry for our db which all defined columns
+    new_todo = Todo(title=title, category=category, createtime=ts, completetime=None, complete=False, user_id=curr_user)   #create a new entry for our db which all defined columns
     db.session.add(new_todo)            #we need session to establish all conversations with db, represents holding zone before modifying db
     db.session.commit()                 #commit changes/modify db
     return redirect(url_for("index"))   #redirect changes to our mainpage which will imediately show the added row in our table
@@ -197,13 +201,14 @@ def statistics():
     WITH cat AS(
             SELECT DATE(completetime) AS date, category, count(category) AS count 
     FROM fake_tasks
+    WHERE user_id = '{}'
     GROUP BY date, category )
     SELECT * , sum(count) OVER (PARTITION BY category ORDER BY date) AS count_all
     FROM cat
-    WHERE date IS NOT NULL
-    GROUP BY date ,category, count
+    WHERE date IS NOT NULL 
+    GROUP BY date ,category, count;
     
-    '''
+    '''.format(current_user.id)
    
     df2 = pd.read_sql(query2,  db.session.bind) #query our db with pre-defined query to get cumulative number of tasks
     
