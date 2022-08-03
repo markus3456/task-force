@@ -48,6 +48,7 @@ from forms import login_form,register_form
 from models import Todo
 
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -134,13 +135,16 @@ def register():
 
 @app.route("/", methods=("GET", "POST"), strict_slashes=False)
 def index():
+    
     curr_user = current_user.id
+    #curr_user = 4
     print(curr_user)
     todo_list = db.session.query(Todo).filter_by(complete=False, user_id=curr_user)      #query the db using our defined class we defined before named Todo, List will be used to display all tasks in db
     category=[{'category': 'Select Category'},{'category': 'programming'},{'category': 'art'},{'category':'sport'}]     #define list of categories for dropdown menu
     return render_template('index.html', category=category, todo_list=todo_list) #need to render our html template and send our created lists
     #print(todo_list)
     #return render_template("index.html",title="Home")
+
 
 
 #Main Page
@@ -189,11 +193,12 @@ def about():
 
 @app.route('/statistics')
 def statistics():
-    todo_list = Todo.query.all()
-    count = db.session.query(Todo).filter_by().count()
+    todo_list = db.session.query(Todo).filter_by(user_id=current_user.id)
+    count = db.session.query(Todo).filter_by(user_id=current_user.id).count()
     
     #import data from sql db to pandas dataframe to simplify data manipulation
-    df = pd.read_sql('SELECT * FROM fake_tasks',  db.session.bind)   #create dataframe by querying sql db and establishing session.
+    query1 = '''SELECT * FROM fake_tasks WHERE user_id = '{}'; '''.format(current_user.id)
+    df = pd.read_sql(query1,  db.session.bind)   #create dataframe by querying sql db and establishing session.
     
     #create cumulative count over time grouped by categories.
     #this enables visualizing the progress of competed task over a certain time
@@ -217,12 +222,14 @@ def statistics():
     WITH cat AS(
         SELECT category, count(category) AS count  
         FROM fake_tasks
+        WHERE user_id = '{}'
         GROUP BY category)
     SELECT *, round(100 * count / (sum(count) OVER())::numeric,2) AS percent
     FROM cat
-    GROUP BY category ,count
+    GROUP BY category ,count;
     
-    '''
+    '''.format(current_user.id)
+
     df3 = pd.read_sql(query3, db.session.bind)  #create dataframe with amount of tasks for each category unsing sql query3
    
     tc = df.completetime - df.createtime #calculate time to complete for each task using time difference, tc = time to complete
