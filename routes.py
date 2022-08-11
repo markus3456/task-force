@@ -136,12 +136,13 @@ def register():
 #Main Page
 @app.route("/", methods=("GET", "POST"), strict_slashes=False)
 def index():
+
     if current_user.is_authenticated:    
         curr_user = current_user.id
         #curr_user = 4
         print(curr_user)
         todo_list = db.session.query(Todo).filter_by(complete=False, user_id=curr_user)      #query the db using our defined class we defined before named Todo, List will be used to display all tasks in db
-        category=[{'category': 'Select Category'},{'category': 'programming'},{'category': 'art'},{'category':'sport'}]     #define list of categories for dropdown menu
+        category=[{'category': 'Select Category'},{'category': 'programming'},{'category': 'art'},{'category':'sport'},{'category': 'housekeeping'},{'category': 'other'}]     #define list of categories for dropdown menu
         return render_template('index.html', category=category, todo_list=todo_list) #need to render our html template and send our created lists
     else:
         curr_user = 4
@@ -212,6 +213,7 @@ def statistics():
     
         df2 = pd.read_sql(query2,  db.session.bind) #query our db with pre-defined query to get cumulative number of tasks
         
+        #database = 'fake_tasks'
         #querying tasks of all categories as percentage to visualize it in pie chart later
         query3 = '''
         WITH cat AS(
@@ -238,7 +240,18 @@ def statistics():
 
         #Graphs
         #fig is a line chart to vizualize the cumulative amount of tasks over time of each category
-        category_list = ['programming','art','sport']
+
+        query4 = '''SELECT category
+                    FROM fake_tasks
+                    WHERE user_id = '{}'
+                    GROUP BY category;'''.format(current_user.id)
+
+        df4 = pd.read_sql(query4, db.session.bind)
+        category_list = df4['category'].tolist()
+        print(df4)
+
+        
+        #category_list = ['programming','art','sport']
 
         fig = go.Figure()
         for k in category_list:
@@ -272,8 +285,10 @@ def statistics():
         tc = str(tc)
 
         return render_template('statistics.html', todo_list=todo_list,  graphJSON=graphJSON, graphJSON_2=graphJSON_2, count=count, tc=tc )
+
     else:
         return render_template('index.html')
+
 @app.route("/logout")
 @login_required
 def logout():
