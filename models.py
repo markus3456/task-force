@@ -11,10 +11,12 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     pwd = db.Column(db.String(300), nullable=False, unique=True)
+    activate = db.Column(db.Boolean)
 
     def __repr__(self):
         return '<User %r>' % self.username
 
+#in order to create the table named "tasks" in the database "taskforce", we need to create a model
 class Todo(db.Model):               
 
     __tablename__ = 'fake_tasks'

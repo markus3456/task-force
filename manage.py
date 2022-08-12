@@ -19,3 +19,17 @@ def deploy():
 	#upgrade()
 	
 deploy()
+
+def activate_user(database,email):
+	conn_string = database
+	conn = psycopg2.connect(conn_string)
+	cursor = conn.cursor()
+
+	query = '''UPDATE user2 SET activate = true WHERE email = '{}'
+	'''.format(email)
+    
+	cursor.execute(query)
+	updated_rows = cursor.rowcount
+	print(updated_rows)
+	conn.commit()
+	cursor.close()
