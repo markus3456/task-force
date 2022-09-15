@@ -3,7 +3,7 @@ import psycopg2
 def deploy():
 	"""Run deployment tasks."""
 	from app import create_app,db
-	from flask_migrate import upgrade,migrate,init,stamp
+	#from flask_migrate import upgrade,migrate,init,stamp
 	from models import User
 
     

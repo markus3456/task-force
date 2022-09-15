@@ -17,13 +17,13 @@ from sqlalchemy.exc import (
 )
 from werkzeug.routing import BuildError
 
-from turtle import title
+#from turtle import title
 import pandas as pd
 import numpy as np
 
 from unicodedata import category
 from flask import Flask, render_template, request, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
+#from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 import json
@@ -158,6 +158,7 @@ def add():
     curr_user = current_user.id
     title = request.form.get("title")       #at our page we have to enter a title. ".get" takes the string from the input 
     category = request.form.get("category")     #same priciple. get pre-defined string from dropdown menu
+    print(category)
     ts = datetime.now()                         #now we create a timestamp of current time to define createtime
     ts = ts.replace(second=0, microsecond=0)    #remove seconds and microseconds
     new_todo = Todo(title=title, category=category, createtime=ts, completetime=None, complete=False, user_id=curr_user)   #create a new entry for our db which all defined columns
