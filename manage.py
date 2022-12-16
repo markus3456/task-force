@@ -17,7 +17,7 @@ def deploy():
 	#stamp()
 	#migrate()
 	#upgrade()
-	
+	print("database deployed")
 deploy()
 
 def activate_user(database,email):

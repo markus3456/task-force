@@ -9,7 +9,7 @@ fake = faker.Faker()
 
 def make_tasks(num):
 
-    conn_string = 'postgresql://postgres:admin@localhost:5432/taskforce'
+    conn_string = "dbname=mytest user=postgres host=localhost password=postgres port=5455"
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
     print('opend db successfully')
@@ -66,7 +66,7 @@ def upload_db(df):
     print(col_str)
 
     #connect to database
-    conn_string = 'postgresql://postgres:admin@localhost:5432/taskforce'
+    conn_string = "dbname=mytest user=postgres host=myPostgresDB password=postgres port=5455"
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
     print('opend db successfully')
@@ -117,7 +117,7 @@ def add_db(df):
     print(col_str)
 
     #connect to database
-    conn_string = 'postgresql://postgres:admin@localhost:5432/taskforce'
+    conn_string = "dbname=mytest user=postgres host=myPostgresDB password=postgres port=5455"
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
     print('opend db successfully')
@@ -146,5 +146,5 @@ task_df = make_tasks(num)
 print(task_df)
 print(task_df.info())
 
-a = add_db(task_df)
+#a = add_db(task_df)
 #a = upload_db(task_df)

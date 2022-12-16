@@ -1,6 +1,6 @@
 FROM ubuntu
 RUN apt-get update -y && \
-    apt-get install -y python-dev-is-python3 python3-psycopg2\
+    apt-get install -y python-dev-is-python3 python3-psycopg2 telnet\
     python3-pip
     
 

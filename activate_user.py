@@ -1,6 +1,6 @@
 import manage 
 
-database = 'postgresql://postgres:admin@localhost:5432/taskforce'
+database = 'dbname=mytest user=postgres host=myPostgresDB password=postgres port=5455'
 email = 'mf14@mail.com'
 
 manage.activate_user(database,email)
