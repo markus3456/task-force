@@ -20,10 +20,11 @@ from werkzeug.routing import BuildError
 #from turtle import title
 import pandas as pd
 import numpy as np
+import sqlalchemy
 
 from unicodedata import category
 from flask import Flask, render_template, request, redirect, url_for
-#from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 import json
@@ -190,12 +191,15 @@ def about():
 @app.route('/statistics')
 def statistics():
     if current_user.is_authenticated: 
+
+        engine = sqlalchemy.create_engine("postgresql://postgres:postgres@psql:5432/mytest")
+
         todo_list = db.session.query(Todo).filter_by(user_id=current_user.id)
         count = db.session.query(Todo).filter_by(user_id=current_user.id).count()
         
         #import data from sql db to pandas dataframe to simplify data manipulation
         query1 = '''SELECT * FROM fake_tasks WHERE user_id = '{}'; '''.format(current_user.id)
-        df = pd.read_sql(query1,  db.session.bind)   #create dataframe by querying sql db and establishing session.
+        df = pd.read_sql(query1,  con = engine)   #create dataframe by querying sql db and establishing session.
         
         #create cumulative count over time grouped by categories.
         #this enables visualizing the progress of competed task over a certain time
@@ -212,7 +216,7 @@ def statistics():
         
         '''.format(current_user.id)
     
-        df2 = pd.read_sql(query2,  db.session.bind) #query our db with pre-defined query to get cumulative number of tasks
+        df2 = pd.read_sql(query2,  con = engine) #query our db with pre-defined query to get cumulative number of tasks
         
         #database = 'fake_tasks'
         #querying tasks of all categories as percentage to visualize it in pie chart later
@@ -228,7 +232,7 @@ def statistics():
         
         '''.format(current_user.id)
 
-        df3 = pd.read_sql(query3, db.session.bind)  #create dataframe with amount of tasks for each category unsing sql query3
+        df3 = pd.read_sql(query3, con = engine)  #create dataframe with amount of tasks for each category unsing sql query3
     
         tc = df.completetime - df.createtime #calculate time to complete for each task using time difference, tc = time to complete
         tc = tc.astype('timedelta64[h]')  #transform format to display hours
@@ -247,7 +251,7 @@ def statistics():
                     WHERE user_id = '{}'
                     GROUP BY category;'''.format(current_user.id)
 
-        df4 = pd.read_sql(query4, db.session.bind)
+        df4 = pd.read_sql(query4, con = engine)
         category_list = df4['category'].tolist()
         print(df4)
 
