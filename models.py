@@ -28,12 +28,24 @@ class Todo(db.Model):
     completetime = db.Column(db.DateTime())
     complete = db.Column(db.Boolean)
     user_id = db.Column(db.Integer, db.ForeignKey('user2.id'))
+    hours_worked = db.Column(db.Time)
     request = db.relationship("User", backref=db.backref("user2", uselist=False))
 
-    def __init__(self, title, category, createtime, completetime, complete, user_id):            #constructor
-            self.title = title;
-            self.category = category;
-            self.createtime = createtime;
-            self.completetime = completetime;
-            self.complete = complete;
-            self.user_id = user_id;
+    # def __init__(self, title, category, createtime, completetime, complete, user_id):            #constructor
+    #         self.title = title;
+    #         self.category = category;
+    #         self.createtime = createtime;
+    #         self.completetime = completetime;
+    #         self.complete = complete;
+    #         self.user_id = user_id;
+
+class Hours(db.Model):
+
+    __tablename__= 'hours'
+
+    id = db.Column(db.Integer, primary_key=True)
+    task_id = db.Column(db.Integer, db.ForeignKey('fake_tasks.id'))
+    start = db.Column(db.DateTime())
+    stop = db.Column(db.DateTime())
+
+             

@@ -21,6 +21,7 @@ from werkzeug.routing import BuildError
 import pandas as pd
 import numpy as np
 import sqlalchemy
+import time
 
 from unicodedata import category
 from flask import Flask, render_template, request, redirect, url_for
@@ -44,9 +45,9 @@ from flask_login import (
 )
 
 from app import create_app,db,login_manager,bcrypt
-from models import User
+from models import User, Todo, Hours
 from forms import login_form,register_form
-from models import Todo
+
 
 
 
@@ -72,6 +73,8 @@ def login():
     if form.validate_on_submit():
         try:
             user = User.query.filter_by(email=form.email.data).first()
+            print(form.email.data)
+            print(user)
             if check_password_hash(user.pwd, form.pwd.data):
                 login_user(user)
                 return redirect(url_for('index'))
@@ -167,6 +170,11 @@ def add():
     db.session.commit()                 #commit changes/modify db
     return redirect(url_for("index"))   #redirect changes to our mainpage which will imediately show the added row in our table
 
+#Timerfunction
+# def timer():
+    
+#     return redirect(url_for("index"))
+
 @app.route("/update/<int:todo_id>")
 def update(todo_id):
     todo = Todo.query.filter_by(id=todo_id).first()
@@ -184,6 +192,21 @@ def delete(todo_id):
     db.session.commit()
     return redirect(url_for("index"))
 
+@app.route("/start/<int:todo_id>")
+#def hours(todo_id):
+    
+
+def start(todo_id):
+    todo = Todo.query.filter_by(id=todo_id).first()
+    #hours = Hours.query.filter_by(id=hours_id).first()
+    start = datetime.now()
+    start = start.replace(second=0, microsecond=0)
+    new_hours = Hours(task_id=todo_id, start=start, stop=None)
+    db.session.add(new_hours)
+    
+    db.session.commit()
+    return redirect(url_for("index"))
+
 @app.route('/about')
 def about():
     return render_template('about.html')
@@ -192,7 +215,7 @@ def about():
 def statistics():
     if current_user.is_authenticated: 
 
-        engine = sqlalchemy.create_engine("postgresql://postgres:postgres@psql:5432/mytest")
+        engine = sqlalchemy.create_engine('postgresql://postgres:postgres@localhost:5455/mytest' )
 
         todo_list = db.session.query(Todo).filter_by(user_id=current_user.id)
         count = db.session.query(Todo).filter_by(user_id=current_user.id).count()
