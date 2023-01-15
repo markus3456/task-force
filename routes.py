@@ -21,6 +21,7 @@ from werkzeug.routing import BuildError
 import pandas as pd
 import numpy as np
 import sqlalchemy
+from sqlalchemy import select
 import time
 
 from unicodedata import category
@@ -165,7 +166,7 @@ def add():
     print(category)
     ts = datetime.now()                         #now we create a timestamp of current time to define createtime
     ts = ts.replace(second=0, microsecond=0)    #remove seconds and microseconds
-    new_todo = Todo(title=title, category=category, createtime=ts, completetime=None, complete=False, user_id=curr_user)   #create a new entry for our db which all defined columns
+    new_todo = Todo(title=title, category=category, createtime=ts, completetime=None, complete=False, working_status=False ,user_id=curr_user)   #create a new entry for our db which all defined columns
     db.session.add(new_todo)            #we need session to establish all conversations with db, represents holding zone before modifying db
     db.session.commit()                 #commit changes/modify db
     return redirect(url_for("index"))   #redirect changes to our mainpage which will imediately show the added row in our table
@@ -178,10 +179,13 @@ def add():
 @app.route("/update/<int:todo_id>")
 def update(todo_id):
     todo = Todo.query.filter_by(id=todo_id).first()
+    #currently_working = select(Todo.working_status).where((Todo.id == todo_id))
+    #print(currently_working)
     todo.complete = not todo.complete
     ts = datetime.now()
     ts = ts.replace(second=0, microsecond=0)
     todo.completetime = ts
+  
     db.session.commit()
     return redirect(url_for("index"))
 
@@ -193,17 +197,28 @@ def delete(todo_id):
     return redirect(url_for("index"))
 
 @app.route("/start/<int:todo_id>")
-#def hours(todo_id):
-    
-
 def start(todo_id):
     todo = Todo.query.filter_by(id=todo_id).first()
+    todo.working_status = not todo.working_status
     #hours = Hours.query.filter_by(id=hours_id).first()
-    start = datetime.now()
-    start = start.replace(second=0, microsecond=0)
-    new_hours = Hours(task_id=todo_id, start=start, stop=None)
+    ts = datetime.now()
+    ts = ts.replace(microsecond=0)
+    new_hours = Hours(task_id=todo_id, start=ts, stop=None)
     db.session.add(new_hours)
     
+    db.session.commit()
+    return redirect(url_for("index"))
+
+@app.route("/stop/<int:todo_id>")
+def stop(todo_id):
+    todo = Todo.query.filter_by(id=todo_id).first()
+    todo.working_status = not todo.working_status
+    hours_id = select(Hours.id).where((Hours.task_id == todo_id) & (Hours.stop == None ))
+    print(hours_id)
+    ts = datetime.now()
+    ts = ts.replace(microsecond=0)
+    new_hours = Hours.query.filter_by(id=hours_id).first()
+    new_hours.stop = ts
     db.session.commit()
     return redirect(url_for("index"))
 

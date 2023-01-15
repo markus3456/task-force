@@ -34,7 +34,7 @@ def activate_user(database,email):
 	conn.commit()
 	cursor.close()
 
-def add_column(database,table_name,column_name):
+def add_column(database,table_name,column_name,_type):
 	#connect to db
 	conn_string = database
 	conn = psycopg2.connect(conn_string)
@@ -42,7 +42,7 @@ def add_column(database,table_name,column_name):
 	print(f'opend {conn_string} successful')
 
 
-	query = f'''ALTER TABLE {table_name} ADD COLUMN {column_name} float'''
+	query = f'''ALTER TABLE {table_name} ADD COLUMN {column_name} {_type}'''
 	cursor.execute(query)
 	print(f"column: {column_name} added")
 	conn.commit()
@@ -50,5 +50,6 @@ def add_column(database,table_name,column_name):
 
 # db = 'postgresql://postgres:postgres@localhost:5455/mytest'
 # tn = 'fake_tasks'
-# cn = 'hours_worked' 
-# add_column(db,tn,cn)
+# cn = 'working_status'
+# t = 'boolean default false' 
+# add_column(db,tn,cn,t)

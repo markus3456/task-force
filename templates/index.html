@@ -56,15 +56,20 @@
         <td>{{ todo.category }}</td>
         <td>{{ todo.createtime }}</td>
         <td>
-          {% if todo.complete == False %}
-            <span>| Not Completed</span>
+          {% if todo.working_status == False %}
+            <span>| not working</span>
+            
           {% else %}
-            <span>| Completed</span>
+            <span>| currently working on</span>
+            
           {% endif %}
         </td>
           <td>
-            
-            <a href="/start/{{ todo.id }}">Start</a>
+            {% if todo.working_status == False %}
+              <a href="/start/{{ todo.id }}">Start</a>
+            {% else %}
+              <a href="/stop/{{ todo.id }}">Stop</a>
+            {% endif %}
             <a href="/update/{{ todo.id }}">Update</a>
             <a href="/delete/{{ todo.id }}">Delete</a>
           </td>

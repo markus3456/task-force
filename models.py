@@ -29,6 +29,7 @@ class Todo(db.Model):
     complete = db.Column(db.Boolean)
     user_id = db.Column(db.Integer, db.ForeignKey('user2.id'))
     hours_worked = db.Column(db.Time)
+    working_status = db.Column(db.Boolean)
     request = db.relationship("User", backref=db.backref("user2", uselist=False))
 
     # def __init__(self, title, category, createtime, completetime, complete, user_id):            #constructor
