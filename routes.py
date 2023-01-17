@@ -191,7 +191,9 @@ def update(todo_id):
 
 @app.route("/delete/<int:todo_id>")
 def delete(todo_id):
+    Hours.query.filter_by(task_id=todo_id).delete()
     todo = Todo.query.filter_by(id=todo_id).first()
+    
     db.session.delete(todo)
     db.session.commit()
     return redirect(url_for("index"))
