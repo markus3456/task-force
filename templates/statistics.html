@@ -83,6 +83,7 @@
                   <th>Create Time</th>
                   <th>Complete Time</th>
                   <th>Status</th>
+                  <th>Hours Worked</th>
                   
                 </tr>
               </thead>
@@ -101,6 +102,7 @@
                         <span>| Completed</span>
                       {% endif %}
                     </td>
+                    <td>{{ todo.max_hours }}</td>
                     
                   </tr>
                 {% endfor %}

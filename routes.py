@@ -48,7 +48,7 @@ from flask_login import (
 from app import create_app,db,login_manager,bcrypt
 from models import User, Todo, Hours
 from forms import login_form,register_form
-
+from SQL import table_of_tasks
 
 
 
@@ -222,6 +222,8 @@ def stop(todo_id):
     new_hours = Hours.query.filter_by(id=hours_id).first()
     new_hours.stop = ts
     db.session.commit()
+
+
     return redirect(url_for("index"))
 
 @app.route('/about')
@@ -234,9 +236,15 @@ def statistics():
 
         engine = sqlalchemy.create_engine('postgresql://postgres:postgres@localhost:5455/mytest' )
 
+        todo_list1 = table_of_tasks(current_user.id)
         todo_list = db.session.query(Todo).filter_by(user_id=current_user.id)
+        print('sql:',type(todo_list1))
+        print('sqlalchemy:',type(todo_list))
         count = db.session.query(Todo).filter_by(user_id=current_user.id).count()
         
+
+                    
+
         #import data from sql db to pandas dataframe to simplify data manipulation
         query1 = '''SELECT * FROM fake_tasks WHERE user_id = '{}'; '''.format(current_user.id)
         df = pd.read_sql(query1,  con = engine)   #create dataframe by querying sql db and establishing session.
