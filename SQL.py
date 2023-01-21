@@ -1,7 +1,16 @@
 import sqlalchemy
 from sqlalchemy import select
 import pandas as pd
-
+from models import Hours,Todo,User
+from flask import (
+    Flask,
+    render_template,
+    redirect,
+    flash,
+    url_for,
+    session
+)
+from app import db
 
 
 
@@ -27,4 +36,10 @@ def table_of_tasks(user_id):
     df = pd.read_sql(query,  con = engine)
     print(df)
     return query
+
+def table_of_tasks_alchemy():
+
+    engine = sqlalchemy.create_engine('postgresql://postgres:postgres@localhost:5455/mytest' )
+    subquery1 = db.session.query(Hours).filter()
+
 

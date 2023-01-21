@@ -146,7 +146,7 @@ def index():
         curr_user = current_user.id
         #curr_user = 4
         print(curr_user)
-        todo_list = db.session.query(Todo).filter_by(complete=False, user_id=curr_user)      #query the db using our defined class we defined before named Todo, List will be used to display all tasks in db
+        todo_list = db.session.query(Todo).filter_by(complete=False, user_id=curr_user).order_by(Todo.id)      #query the db using our defined class we defined before named Todo, List will be used to display all tasks in db
         category=[{'category': 'Select Category'},{'category': 'programming'},{'category': 'art'},{'category':'sport'},{'category': 'housekeeping'},{'category': 'other'}]     #define list of categories for dropdown menu
         return render_template('index.html', category=category, todo_list=todo_list) #need to render our html template and send our created lists
     else:
@@ -236,13 +236,14 @@ def statistics():
 
         engine = sqlalchemy.create_engine('postgresql://postgres:postgres@localhost:5455/mytest' )
 
-        todo_list1 = table_of_tasks(current_user.id)
-        todo_list = db.session.query(Todo).filter_by(user_id=current_user.id)
+        stmt = table_of_tasks(current_user.id)
+        todo_list = db.session.execute(stmt)
+
+        todo_list1 = db.session.query(Todo).filter_by(user_id=current_user.id)
         print('sql:',type(todo_list1))
         print('sqlalchemy:',type(todo_list))
         count = db.session.query(Todo).filter_by(user_id=current_user.id).count()
         
-
                     
 
         #import data from sql db to pandas dataframe to simplify data manipulation
